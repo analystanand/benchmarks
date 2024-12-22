@@ -2,6 +2,24 @@
 
 Compare run time of different frameworks.
 
+# Environment and Package Versions
+The benchmarks were run in the following environment:
+```
+Operating System: macOS
+Python Version: 3.8
+```
+The versions of the packages used are:
+```
+TensorFlow: 2.6.0
+PyTorch: 1.9.0
+ONNX Runtime: 1.8.1
+JAX: 0.2.19
+OpenVINO: 2021.4.2
+NumPy: 1.21.2
+Matplotlib: 3.4.3
+Pillow: 8.3.2
+psutil: 5.8.0
+```
 ## Setup
 
 1. Create a virtual environment and activate it:
