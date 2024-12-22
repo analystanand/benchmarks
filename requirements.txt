@@ -3,5 +3,4 @@ torch
 tensorflow
 onnxruntime
 matplotlib
-onnxruntime
-onnxgi
+onnx
