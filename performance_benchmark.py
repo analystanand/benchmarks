@@ -6,6 +6,10 @@ import tensorflow as tf
 import onnxruntime as ort
 import matplotlib.pyplot as plt
 from PIL import Image
+import psutil
+import jax
+import jax.numpy as jnp
+from openvino.runtime import Core
 
 # Disable GPU and suppress TensorFlow logs
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
@@ -27,6 +31,15 @@ tensorflow_model = tf.keras.Sequential([
     tf.keras.layers.Dense(1)
 ])
 tensorflow_model.compile()
+
+# JAX Model Definition
+def jax_model(x):
+    return jax.nn.relu(jnp.dot(x, jnp.ones((10, 1))))
+
+# OpenVINO Model Definition
+core = Core()
+openvino_model = core.read_model(model="model.onnx")
+compiled_model = core.compile_model(openvino_model, device_name="CPU")
 
 # Create PyTorch model
 pytorch_model = PyTorchModel()
@@ -52,22 +65,30 @@ input_data = np.random.rand(1000, 10).astype(np.float32)
 # Function to benchmark a model
 def benchmark_model(predict_function, input_data, num_runs=1000):
     start_time = time.time()
+    process = psutil.Process(os.getpid())
+    cpu_usage = []
+    memory_usage = []
     for _ in range(num_runs):
         predict_function(input_data)
+        cpu_usage.append(process.cpu_percent())
+        memory_usage.append(process.memory_info().rss)
     end_time = time.time()
-    return (end_time - start_time) / num_runs
+    avg_latency = (end_time - start_time) / num_runs
+    avg_cpu = np.mean(cpu_usage)
+    avg_memory = np.mean(memory_usage) / (1024 * 1024)  # Convert to MB
+    return avg_latency, avg_cpu, avg_memory
 
 # Benchmark TensorFlow model
 def tensorflow_predict(input_data):
     tensorflow_model(input_data)
 
-tensorflow_time = benchmark_model(lambda x: tensorflow_predict(x), input_data)
+tensorflow_latency, tensorflow_cpu, tensorflow_memory = benchmark_model(lambda x: tensorflow_predict(x), input_data)
 
 # Benchmark PyTorch model
 def pytorch_predict(input_data):
     pytorch_model(torch.tensor(input_data))
 
-pytorch_time = benchmark_model(lambda x: pytorch_predict(x), input_data)
+pytorch_latency, pytorch_cpu, pytorch_memory = benchmark_model(lambda x: pytorch_predict(x), input_data)
 
 # Benchmark ONNX model
 def onnx_predict(input_data):
@@ -76,19 +97,45 @@ def onnx_predict(input_data):
         single_input = input_data[i:i+1]  # Extract single input
         onnx_session.run(None, {onnx_session.get_inputs()[0].name: single_input})
 
-onnx_time = benchmark_model(lambda x: onnx_predict(x), input_data)
+onnx_latency, onnx_cpu, onnx_memory = benchmark_model(lambda x: onnx_predict(x), input_data)
+
+# Benchmark JAX model
+def jax_predict(input_data):
+    jax_model(jnp.array(input_data))
+
+jax_latency, jax_cpu, jax_memory = benchmark_model(lambda x: jax_predict(x), input_data)
+
+# Benchmark OpenVINO model
+def openvino_predict(input_data):
+    compiled_model.infer_new_request({0: input_data})
+
+openvino_latency, openvino_cpu, openvino_memory = benchmark_model(lambda x: openvino_predict(x), input_data)
 
 # Plot the results
-frameworks = ['TensorFlow', 'PyTorch', 'ONNX']
-times = [tensorflow_time, pytorch_time, onnx_time]
+frameworks = ['TensorFlow', 'PyTorch', 'ONNX', 'JAX', 'OpenVINO']
+latencies = [tensorflow_latency, pytorch_latency, onnx_latency, jax_latency, openvino_latency]
+cpu_usages = [tensorflow_cpu, pytorch_cpu, onnx_cpu, jax_cpu, openvino_cpu]
+memory_usages = [tensorflow_memory, pytorch_memory, onnx_memory, jax_memory, openvino_memory]
 
-plt.bar(frameworks, times)
-plt.xlabel('Framework')
-plt.ylabel('Average Inference Time (seconds)')
-plt.title('Inference Time Comparison')
+fig, axs = plt.subplots(3, 1, figsize=(10, 15))
+
+axs[0].bar(frameworks, latencies)
+axs[0].set_xlabel('Framework')
+axs[0].set_ylabel('Average Latency (seconds)')
+axs[0].set_title('Latency Comparison')
+
+axs[1].bar(frameworks, cpu_usages)
+axs[1].set_xlabel('Framework')
+axs[1].set_ylabel('Average CPU Usage (%)')
+axs[1].set_title('CPU Usage Comparison')
+
+axs[2].bar(frameworks, memory_usages)
+axs[2].set_xlabel('Framework')
+axs[2].set_ylabel('Average Memory Usage (MB)')
+axs[2].set_title('Memory Usage Comparison')
 
 # Save chart as a JPG image
-image_path = "inference_time_comparison.jpg"
+image_path = "benchmark_comparison.jpg"
 plt.savefig(image_path, format='jpg')
 plt.show()
 
