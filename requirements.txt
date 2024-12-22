@@ -4,3 +4,6 @@ tensorflow
 onnxruntime
 matplotlib
 onnx
+jax
+jaxlib
+openvino
