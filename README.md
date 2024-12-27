@@ -5,17 +5,20 @@ Compare run time of different frameworks.
 # Environment and Package Versions
 The benchmarks were run in the following environment:
 ```
-Operating System: macOS
-Python Version: 3.8
+Experiment Enviroment: (Github Codespace)[https://docs.github.com/en/codespaces/overview]
+Python Version: 3.12.1
 ```
 The versions of the packages used are:
 ```
-TensorFlow: 2.6.0
-PyTorch: 1.9.0
-ONNX Runtime: 1.8.1
-JAX: 0.2.19
-OpenVINO: 2021.4.2
-NumPy: 1.21.2
+numpy==2.0.2
+torch==2.5.1+cpu
+tensorflow==2.18.0
+onnx==1.17.0
+onnxruntime==1.20.1
+jax==0.4.38
+jaxlib==0.4.38
+openvino==2024.6.0
+matplotlib==3.9.3
 Matplotlib: 3.4.3
 Pillow: 8.3.2
 psutil: 5.8.0
