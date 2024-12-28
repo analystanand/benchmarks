@@ -101,17 +101,24 @@ def benchmark_model(predict_function, input_data, num_runs=1000):
     avg_memory = np.mean(memory_usage) / (1024 * 1024)  # Convert to MB
     return avg_latency, avg_cpu, avg_memory
 
-# Benchmark TensorFlow model
-def tensorflow_predict(input_data):
-    tensorflow_model(input_data)
-
-tensorflow_latency, tensorflow_cpu, tensorflow_memory = benchmark_model(lambda x: tensorflow_predict(x), input_data)
 
 # Benchmark PyTorch model
 def pytorch_predict(input_data):
     pytorch_model(torch.tensor(input_data))
 
 pytorch_latency, pytorch_cpu, pytorch_memory = benchmark_model(lambda x: pytorch_predict(x), input_data)
+
+# Benchmark TensorFlow model
+def tensorflow_predict(input_data):
+    tensorflow_model(input_data)
+
+tensorflow_latency, tensorflow_cpu, tensorflow_memory = benchmark_model(lambda x: tensorflow_predict(x), input_data)
+
+# Benchmark JAX model
+def jax_predict(input_data):
+    jax_model(jnp.array(input_data))
+
+jax_latency, jax_cpu, jax_memory = benchmark_model(lambda x: jax_predict(x), input_data)
 
 # Benchmark ONNX model
 def onnx_predict(input_data):
@@ -121,12 +128,6 @@ def onnx_predict(input_data):
         onnx_session.run(None, {onnx_session.get_inputs()[0].name: single_input})
 
 onnx_latency, onnx_cpu, onnx_memory = benchmark_model(lambda x: onnx_predict(x), input_data)
-
-# Benchmark JAX model
-def jax_predict(input_data):
-    jax_model(jnp.array(input_data))
-
-jax_latency, jax_cpu, jax_memory = benchmark_model(lambda x: jax_predict(x), input_data)
 
 # Benchmark OpenVINO model
 def openvino_predict(input_data):
@@ -138,10 +139,10 @@ def openvino_predict(input_data):
 openvino_latency, openvino_cpu, openvino_memory = benchmark_model(lambda x: openvino_predict(x), input_data)
 
 # Plot the results
-frameworks = ['TensorFlow', 'PyTorch', 'ONNX', 'JAX', 'OpenVINO']
-latencies = [tensorflow_latency, pytorch_latency, onnx_latency, jax_latency, openvino_latency]
-cpu_usages = [tensorflow_cpu, pytorch_cpu, onnx_cpu, jax_cpu, openvino_cpu]
-memory_usages = [tensorflow_memory, pytorch_memory, onnx_memory, jax_memory, openvino_memory]
+frameworks = ['PyTorch', 'TensorFlow', 'JAX', 'ONNX', 'OpenVINO']
+latencies = [pytorch_latency, tensorflow_latency, jax_latency, onnx_latency, openvino_latency]
+cpu_usages = [pytorch_cpu, tensorflow_cpu, jax_cpu, onnx_cpu, openvino_cpu]
+memory_usages = [pytorch_memory, tensorflow_memory, jax_memory, onnx_memory, openvino_memory]
 
 fig, axs = plt.subplots(3, 1, figsize=(10, 15))
 
