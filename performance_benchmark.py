@@ -10,6 +10,7 @@ import psutil
 import jax
 import jax.numpy as jnp
 from openvino.runtime import Core
+import csv
 
 # Disable GPU and suppress TensorFlow logs
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
@@ -130,7 +131,10 @@ jax_latency, jax_cpu, jax_memory = benchmark_model(lambda x: jax_predict(x), inp
 
 # Benchmark OpenVINO model
 def openvino_predict(input_data):
-    compiled_model.infer_new_request({0: input_data})
+    # Process inputs in batches
+    for i in range(input_data.shape[0]):
+        single_input = input_data[i:i+1]  # Extract single input
+        compiled_model.infer_new_request({0: single_input})
 
 openvino_latency, openvino_cpu, openvino_memory = benchmark_model(lambda x: openvino_predict(x), input_data)
 
@@ -165,3 +169,13 @@ plt.show()
 # Add architectural details
 with Image.open(image_path) as img:
     img.show()
+
+# Save results to CSV
+csv_file_path = "benchmark_results.csv"
+with open(csv_file_path, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(["Framework", "Latency (seconds)", "CPU Usage (%)", "Memory Usage (MB)"])
+    for i in range(len(frameworks)):
+        writer.writerow([frameworks[i], latencies[i], cpu_usages[i], memory_usages[i]])
+
+print(f"Benchmark results saved to {csv_file_path}")
