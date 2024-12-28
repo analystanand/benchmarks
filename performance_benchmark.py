@@ -66,11 +66,6 @@ def jax_model(x):
     x = jax.nn.sigmoid(jnp.dot(x, jnp.ones((8, 1))))
     return x
 
-# OpenVINO Model Definition
-core = Core()
-openvino_model = core.read_model(model="model.onnx")
-compiled_model = core.compile_model(openvino_model, device_name="CPU")
-
 # Convert PyTorch model to ONNX
 dummy_input = torch.randn(1, 200)
 onnx_model_path = "model.onnx"
@@ -85,6 +80,12 @@ torch.onnx.export(
     dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}}
 )
 onnx_session = ort.InferenceSession(onnx_model_path)
+
+# OpenVINO Model Definition
+core = Core()
+openvino_model = core.read_model(model="model.onnx")
+compiled_model = core.compile_model(openvino_model, device_name="CPU")
+
 
 # Function to benchmark a model
 def benchmark_model(predict_function, input_data, num_runs=1000):
