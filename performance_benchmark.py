@@ -85,8 +85,6 @@ onnx_session = ort.InferenceSession(onnx_model_path)
 core = Core()
 openvino_model = core.read_model(model="model.onnx")
 compiled_model = core.compile_model(openvino_model, device_name="CPU")
-
-
 # Function to benchmark a model
 def benchmark_model(predict_function, input_data, num_runs=1000):
     start_time = time.time()
