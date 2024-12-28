@@ -1,5 +1,7 @@
 # Benchmarks
 
+This code is used only for information purpose.
+
 Compare run time of different frameworks.
 
 # Environment and Package Versions

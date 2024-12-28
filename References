@@ -1,0 +1,58 @@
+# Code Citations
+
+## License: unknown
+https://github.com/michellewl/building_resilience/tree/b73fcc92d74dd9459444a49ef22a3b7df3e683b1/models/neural_networks/pytorch/multilayer_perceptron.py
+
+```
+, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        x = torch.relu(self.fc3(x))
+        x = torch.relu(self.fc4(x)
+```
+
+
+## License: unknown
+https://github.com/rishijohri/multi_agent/tree/9847ab7093a26e8e20177a0cc9273b864b5c227e/agent/DQN.py
+
+```
+(x))
+        x = torch.relu(self.fc2(x))
+        x = torch.relu(self.fc3(x))
+        x = torch.relu(self.fc4(x))
+        x = torch.relu(self.fc5(x)
+```
+
+
+## License: unknown
+https://github.com/slayellow/Titanic-Machine-Learning-from-Disaster/tree/98d4d6fc4a84510f011bfdfe83bf7abbb16e91b7/model.py
+
+```
+128, activation='relu'),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(16, activation=
+```
+
+
+## License: MIT
+https://github.com/soominok/cheese-ai/tree/526f1e5c12534d4a263e624b47615090a09569b8/com_cheese_api/keras-cheese-category.py
+
+```
+(64, activation='relu'),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(16, activation='relu'),
+    tf.keras.layers.Dense(8, activation
+```
+
+
+## License: unknown
+https://github.com/moey920/DeepLearning/tree/9da832bc3ad6f0a96023cd3f18329187899f8e20/%EB%94%A5%EB%9F%AC%EB%8B%9D%20%EA%B0%9C%EB%85%90%20%EB%B3%84%20%EC%8B%A4%EC%8A%B5/%EB%93%9C%EB%A1%AD%20%EC%95%84%EC%9B%83%28Drop%20out%29%20%EA%B8%B0%EB%B2%95.md
+
+```
+='relu'),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(16, activation='relu'),
+    tf.keras.layers.Dense(8, activation='relu'
+```
+
