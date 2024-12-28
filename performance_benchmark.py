@@ -170,12 +170,37 @@ plt.show()
 with Image.open(image_path) as img:
     img.show()
 
+# Calculate relative performance
+min_latency = min(latencies)
+min_cpu_usage = min(cpu_usages)
+min_memory_usage = min(memory_usages)
+
+relative_latencies = [latency / min_latency for latency in latencies]
+relative_cpu_usages = [cpu / min_cpu_usage for cpu in cpu_usages]
+relative_memory_usages = [memory / min_memory_usage for memory in memory_usages]
+
 # Save results to CSV
 csv_file_path = "benchmark_results.csv"
 with open(csv_file_path, mode='w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(["Framework", "Latency (seconds)", "CPU Usage (%)", "Memory Usage (MB)"])
+    writer.writerow([
+        "Framework", 
+        "Latency (seconds)", 
+        "CPU Usage (%)", 
+        "Memory Usage (MB)", 
+        "Relative Latency", 
+        "Relative CPU Usage", 
+        "Relative Memory Usage"
+    ])
     for i in range(len(frameworks)):
-        writer.writerow([frameworks[i], latencies[i], cpu_usages[i], memory_usages[i]])
+        writer.writerow([
+            frameworks[i], 
+            latencies[i], 
+            cpu_usages[i], 
+            memory_usages[i], 
+            relative_latencies[i], 
+            relative_cpu_usages[i], 
+            relative_memory_usages[i]
+        ])
 
 print(f"Benchmark results saved to {csv_file_path}")
