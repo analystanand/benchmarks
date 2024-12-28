@@ -19,22 +19,45 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow logs
 class PyTorchModel(torch.nn.Module):
     def __init__(self):
         super(PyTorchModel, self).__init__()
-        self.fc = torch.nn.Linear(10, 1)
+        self.fc1 = torch.nn.Linear(200, 128)
+        self.fc2 = torch.nn.Linear(128, 64)
+        self.fc3 = torch.nn.Linear(64, 32)
+        self.fc4 = torch.nn.Linear(32, 16)
+        self.fc5 = torch.nn.Linear(16, 8)
+        self.fc6 = torch.nn.Linear(8, 1)
+        self.sigmoid = torch.nn.Sigmoid()
 
     def forward(self, x):
-        return self.fc(x)
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        x = torch.relu(self.fc3(x))
+        x = torch.relu(self.fc4(x))
+        x = torch.relu(self.fc5(x))
+        x = self.sigmoid(self.fc6(x))
+        return x
 
 # TensorFlow Model Definition
 from tensorflow.keras import Input
 tensorflow_model = tf.keras.Sequential([
-    Input(shape=(10,)),
-    tf.keras.layers.Dense(1)
+    Input(shape=(200,)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(16, activation='relu'),
+    tf.keras.layers.Dense(8, activation='relu'),
+    tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 tensorflow_model.compile()
 
 # JAX Model Definition
 def jax_model(x):
-    return jax.nn.relu(jnp.dot(x, jnp.ones((10, 1))))
+    x = jax.nn.relu(jnp.dot(x, jnp.ones((200, 128))))
+    x = jax.nn.relu(jnp.dot(x, jnp.ones((128, 64))))
+    x = jax.nn.relu(jnp.dot(x, jnp.ones((64, 32))))
+    x = jax.nn.relu(jnp.dot(x, jnp.ones((32, 16))))
+    x = jax.nn.relu(jnp.dot(x, jnp.ones((16, 8))))
+    x = jax.nn.sigmoid(jnp.dot(x, jnp.ones((8, 1))))
+    return x
 
 # OpenVINO Model Definition
 core = Core()
@@ -45,7 +68,7 @@ compiled_model = core.compile_model(openvino_model, device_name="CPU")
 pytorch_model = PyTorchModel()
 
 # Convert PyTorch model to ONNX
-dummy_input = torch.randn(1, 10)
+dummy_input = torch.randn(1, 200)
 onnx_model_path = "model.onnx"
 torch.onnx.export(
     pytorch_model, 
@@ -60,7 +83,7 @@ torch.onnx.export(
 onnx_session = ort.InferenceSession(onnx_model_path)
 
 # Generate dummy data
-input_data = np.random.rand(1000, 10).astype(np.float32)
+input_data = np.random.rand(1000, 200).astype(np.float32)
 
 # Function to benchmark a model
 def benchmark_model(predict_function, input_data, num_runs=1000):
