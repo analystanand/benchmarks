@@ -1,9 +1,9 @@
-numpy==2.0.2
-torch==2.5.1+cpu
-tensorflow==2.18.0
+numpy==1.26.4
+torch==2.2.2
+tensorflow==2.16.2
 onnx==1.17.0
-onnxruntime==1.20.1
-jax==0.4.38
-jaxlib==0.4.38
+onnxruntime==1.17.0
+jax==0.4.30
+jaxlib==0.4.30
 openvino==2024.6.0
 matplotlib==3.9.3
