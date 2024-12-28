@@ -3,6 +3,7 @@ import os
 import numpy as np
 import torch
 import tensorflow as tf
+from tensorflow.keras import Input
 import onnxruntime as ort
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -15,6 +16,9 @@ import csv
 # Disable GPU and suppress TensorFlow logs
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow logs
+
+# Generate dummy data
+input_data = np.random.rand(1000, 200).astype(np.float32)
 
 # Dummy Model Definitions for each framework
 class PyTorchModel(torch.nn.Module):
@@ -37,8 +41,10 @@ class PyTorchModel(torch.nn.Module):
         x = self.sigmoid(self.fc6(x))
         return x
 
+# Create PyTorch model
+pytorch_model = PyTorchModel()
+
 # TensorFlow Model Definition
-from tensorflow.keras import Input
 tensorflow_model = tf.keras.Sequential([
     Input(shape=(200,)),
     tf.keras.layers.Dense(128, activation='relu'),
@@ -65,9 +71,6 @@ core = Core()
 openvino_model = core.read_model(model="model.onnx")
 compiled_model = core.compile_model(openvino_model, device_name="CPU")
 
-# Create PyTorch model
-pytorch_model = PyTorchModel()
-
 # Convert PyTorch model to ONNX
 dummy_input = torch.randn(1, 200)
 onnx_model_path = "model.onnx"
@@ -82,9 +85,6 @@ torch.onnx.export(
     dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}}
 )
 onnx_session = ort.InferenceSession(onnx_model_path)
-
-# Generate dummy data
-input_data = np.random.rand(1000, 200).astype(np.float32)
 
 # Function to benchmark a model
 def benchmark_model(predict_function, input_data, num_runs=1000):
