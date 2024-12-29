@@ -88,7 +88,7 @@ core = Core()
 openvino_model = core.read_model(model="model.onnx")
 compiled_model = core.compile_model(openvino_model, device_name="CPU")
 # Function to benchmark a model
-def benchmark_model(predict_function, input_data, num_runs=10):
+def benchmark_model(predict_function, input_data, num_runs=1000):
     start_time = time.time()
     process = psutil.Process(os.getpid())
     cpu_usage = []
@@ -161,7 +161,7 @@ with open(csv_file_path, mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow([
         "Framework", 
-        "Latency (seconds)", 
+        "Latency (milliseconds)", 
         "CPU Usage (%)", 
         "Memory Usage (MB)", 
         "Relative Latency", 
@@ -171,7 +171,7 @@ with open(csv_file_path, mode='w', newline='') as file:
     for i in range(len(frameworks)):
         writer.writerow([
             frameworks[i], 
-            latencies[i], 
+            latencies[i] * 1000,  # Convert latency to milliseconds
             cpu_usages[i], 
             memory_usages[i], 
             relative_latencies[i], 
