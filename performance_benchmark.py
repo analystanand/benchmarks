@@ -12,6 +12,8 @@ import jax
 import jax.numpy as jnp
 from openvino.runtime import Core
 import csv
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 # Disable GPU and suppress TensorFlow logs
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
@@ -86,7 +88,7 @@ core = Core()
 openvino_model = core.read_model(model="model.onnx")
 compiled_model = core.compile_model(openvino_model, device_name="CPU")
 # Function to benchmark a model
-def benchmark_model(predict_function, input_data, num_runs=1000):
+def benchmark_model(predict_function, input_data, num_runs=10):
     start_time = time.time()
     process = psutil.Process(os.getpid())
     cpu_usage = []
@@ -138,37 +140,11 @@ def openvino_predict(input_data):
 
 openvino_latency, openvino_cpu, openvino_memory = benchmark_model(lambda x: openvino_predict(x), input_data)
 
-# Plot the results
+# prepare data for chart
 frameworks = ['PyTorch', 'TensorFlow', 'JAX', 'ONNX', 'OpenVINO']
 latencies = [pytorch_latency, tensorflow_latency, jax_latency, onnx_latency, openvino_latency]
 cpu_usages = [pytorch_cpu, tensorflow_cpu, jax_cpu, onnx_cpu, openvino_cpu]
 memory_usages = [pytorch_memory, tensorflow_memory, jax_memory, onnx_memory, openvino_memory]
-
-fig, axs = plt.subplots(3, 1, figsize=(10, 15))
-
-axs[0].bar(frameworks, latencies)
-axs[0].set_xlabel('Framework')
-axs[0].set_ylabel('Average Latency (seconds)')
-axs[0].set_title('Latency Comparison')
-
-axs[1].bar(frameworks, cpu_usages)
-axs[1].set_xlabel('Framework')
-axs[1].set_ylabel('Average CPU Usage (%)')
-axs[1].set_title('CPU Usage Comparison')
-
-axs[2].bar(frameworks, memory_usages)
-axs[2].set_xlabel('Framework')
-axs[2].set_ylabel('Average Memory Usage (MB)')
-axs[2].set_title('Memory Usage Comparison')
-
-# Save chart as a JPG image
-image_path = "benchmark_comparison.jpg"
-plt.savefig(image_path, format='jpg')
-plt.show()
-
-# Add architectural details
-with Image.open(image_path) as img:
-    img.show()
 
 # Calculate relative performance
 min_latency = min(latencies)
@@ -204,3 +180,52 @@ with open(csv_file_path, mode='w', newline='') as file:
         ])
 
 print(f"Benchmark results saved to {csv_file_path}")
+
+# Visualize the results
+# Create subplots
+fig = make_subplots(rows=3, cols=1)
+# Add latency bar chart
+fig.add_trace(go.Bar(x=frameworks, y=[latency * 1000 for latency in latencies], name='Latency (milliseconds)', showlegend=True, legendgroup='latency'), row=1, col=1)
+fig.add_trace(go.Scatter(x=frameworks, y=relative_latencies, mode='lines+markers', name='Relative Latency', showlegend=True, legendgroup='latency'), row=1, col=1)
+fig.update_xaxes(title_text="Frameworks", row=1, col=1)
+fig.update_yaxes(title_text="Latency (ms)", row=1, col=1)
+fig.add_annotation(text="<b>Latency Comparison</b>", xref="x domain", yref="y domain", x=0.5, y=1.1, showarrow=False, row=1, col=1)
+
+# Add CPU usage bar chart
+fig.add_trace(go.Bar(x=frameworks, y=cpu_usages, name='CPU Usage (%)', showlegend=True, legendgroup='cpu'), row=2, col=1)
+fig.add_trace(go.Scatter(x=frameworks, y=relative_cpu_usages, mode='lines+markers', name='Relative CPU Usage', showlegend=True, legendgroup='cpu'), row=2, col=1)
+fig.update_xaxes(title_text="Frameworks", row=2, col=1)
+fig.update_yaxes(title_text="CPU Usage (%)", row=2, col=1)
+fig.add_annotation(text="<b>CPU Usage Comparison</b>", xref="x domain", yref="y domain", x=0.5, y=1.1, showarrow=False, row=2, col=1)
+
+# Add memory usage bar chart
+fig.add_trace(go.Bar(x=frameworks, y=memory_usages, name='Memory Usage (MB)', showlegend=True, legendgroup='memory'), row=3, col=1)
+fig.add_trace(go.Scatter(x=frameworks, y=relative_memory_usages, mode='lines+markers', name='Relative Memory Usage', showlegend=True, legendgroup='memory'), row=3, col=1)
+fig.update_xaxes(title_text="Frameworks", row=3, col=1)
+fig.update_yaxes(title_text="Memory Usage (MB)", row=3, col=1)
+fig.add_annotation(text="<b>Memory Usage Comparison</b>", xref="x domain", yref="y domain", x=0.5, y=1.1, showarrow=False, row=3, col=1)
+
+# Update layout
+fig.update_layout(
+    height=900, 
+    width=1000,  # Increased width to accommodate legends
+    title={
+        'text': "Comparison of Deep Learning Inference Frameworks<br><span style='font-size:14px; color:gray;'>Latency, CPU Usage and Memory Usage</span>",
+        'y':0.96,  # Positioned close to the top
+        'x':0.4,
+        'xanchor': 'center',
+        'yanchor': 'top'
+    },
+    margin=dict(t=120, b=50, l=50, r=150),  # Increased right margin to accommodate legends
+    legend=dict(
+        x=1.1,  # Position legend to the right of the subplots
+        y=0.5,  # Center the legend vertically
+        yanchor='middle'
+    ),
+    legend_tracegroupgap=180
+)
+
+# Save chart as an HTML file
+html_path = "benchmark_comparison.html"
+fig.write_html(html_path)
+print(f"Chart saved to {html_path}")
