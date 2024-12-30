@@ -183,26 +183,30 @@ print(f"Benchmark results saved to {csv_file_path}")
 
 # Visualize the results
 # Create subplots
-fig = make_subplots(rows=3, cols=1)
+fig = make_subplots(rows=3, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": True}], [{"secondary_y": True}]])
+
 # Add latency bar chart
-fig.add_trace(go.Bar(x=frameworks, y=[latency * 1000 for latency in latencies], name='Latency (milliseconds)', showlegend=True, legendgroup='latency'), row=1, col=1)
-fig.add_trace(go.Scatter(x=frameworks, y=relative_latencies, mode='lines+markers', name='Relative Latency', showlegend=True, legendgroup='latency'), row=1, col=1)
+fig.add_trace(go.Bar(x=frameworks, y=[latency * 1000 for latency in latencies], name='Latency (milliseconds)', showlegend=True, legendgroup='latency'), row=1, col=1, secondary_y=False)
+fig.add_trace(go.Scatter(x=frameworks, y=relative_latencies, mode='lines+markers', name='Relative Latency', showlegend=True, legendgroup='latency'), row=1, col=1, secondary_y=True)
 fig.update_xaxes(title_text="Frameworks", row=1, col=1)
-fig.update_yaxes(title_text="Latency (ms)", row=1, col=1)
+fig.update_yaxes(title_text="Latency (ms)", row=1, col=1, secondary_y=False)
+fig.update_yaxes(title_text="Relative Latency", row=1, col=1, secondary_y=True)
 fig.add_annotation(text="<b>Latency Comparison</b>", xref="x domain", yref="y domain", x=0.5, y=1.1, showarrow=False, row=1, col=1)
 
 # Add CPU usage bar chart
-fig.add_trace(go.Bar(x=frameworks, y=cpu_usages, name='CPU Usage (%)', showlegend=True, legendgroup='cpu'), row=2, col=1)
-fig.add_trace(go.Scatter(x=frameworks, y=relative_cpu_usages, mode='lines+markers', name='Relative CPU Usage', showlegend=True, legendgroup='cpu'), row=2, col=1)
+fig.add_trace(go.Bar(x=frameworks, y=cpu_usages, name='CPU Usage (%)', showlegend=True, legendgroup='cpu'), row=2, col=1, secondary_y=False)
+fig.add_trace(go.Scatter(x=frameworks, y=relative_cpu_usages, mode='lines+markers', name='Relative CPU Usage', showlegend=True, legendgroup='cpu'), row=2, col=1, secondary_y=True)
 fig.update_xaxes(title_text="Frameworks", row=2, col=1)
-fig.update_yaxes(title_text="CPU Usage (%)", row=2, col=1)
+fig.update_yaxes(title_text="CPU Usage (%)", row=2, col=1, secondary_y=False)
+fig.update_yaxes(title_text="Relative CPU Usage", row=2, col=1, secondary_y=True)
 fig.add_annotation(text="<b>CPU Usage Comparison</b>", xref="x domain", yref="y domain", x=0.5, y=1.1, showarrow=False, row=2, col=1)
 
 # Add memory usage bar chart
-fig.add_trace(go.Bar(x=frameworks, y=memory_usages, name='Memory Usage (MB)', showlegend=True, legendgroup='memory'), row=3, col=1)
-fig.add_trace(go.Scatter(x=frameworks, y=relative_memory_usages, mode='lines+markers', name='Relative Memory Usage', showlegend=True, legendgroup='memory'), row=3, col=1)
+fig.add_trace(go.Bar(x=frameworks, y=memory_usages, name='Memory Usage (MB)', showlegend=True, legendgroup='memory'), row=3, col=1, secondary_y=False)
+fig.add_trace(go.Scatter(x=frameworks, y=relative_memory_usages, mode='lines+markers', name='Relative Memory Usage', showlegend=True, legendgroup='memory'), row=3, col=1, secondary_y=True)
 fig.update_xaxes(title_text="Frameworks", row=3, col=1)
-fig.update_yaxes(title_text="Memory Usage (MB)", row=3, col=1)
+fig.update_yaxes(title_text="Memory Usage (MB)", row=3, col=1, secondary_y=False)
+fig.update_yaxes(title_text="Relative Memory Usage", row=3, col=1, secondary_y=True)
 fig.add_annotation(text="<b>Memory Usage Comparison</b>", xref="x domain", yref="y domain", x=0.5, y=1.1, showarrow=False, row=3, col=1)
 
 # Update layout
